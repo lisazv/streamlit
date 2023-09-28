@@ -269,16 +269,19 @@ df.head()
 
 
 # In[57]:
-
-
-# Titel van de app
-st.title("Interactieve Analyse van Vliegtuigongevallen")
-
 df['Date'] = pd.to_datetime(df['Date'])
 df['Year'] = df['Date'].dt.year  # Voeg een jaar-kolom toe
 
+
+
+# Dropdown menu voor het selecteren van een categorie
+st.sidebar.title("Interactieve Analyse van Vliegtuigongevallen")
+st.sidebar.write('Er wordt onderzoek gedaan naar vliegtuigongevallen tussen 1933 en 2009. \
+We kijken naar militaire vliegtuigongevallen,naar de type fabrikant, welke vluchtfase \
+ er een vliegtuigongeval plaatsvond en naar de oorzaak.')
+
 # Slider voor het filteren op jaar
-min_year, max_year = st.slider(
+min_year, max_year = st.sidebar.slider(
     'Selecteer een jaarrange',
     min_value=df['Date'].dt.year.min(),
     max_value=df['Date'].dt.year.max(),
@@ -290,13 +293,13 @@ filtered_df = df[df['Date'].dt.year.between(min_year, max_year)]
 
 df['Date'] = pd.to_datetime(df['Date'])  # Converteer de datumkolom naar datetime
 
-
-# Dropdown menu voor het selecteren van een categorie
-selected_category = st.selectbox('Selecteer een categorie', options=['Militaire vluchten', 'Fabrikant', 'Vlucht Fase', 'Oorzaak'])
+selected_category = st.sidebar.selectbox('Selecteer een categorie', options=['Militaire vluchten', 'Fabrikant', 'Vlucht Fase', 'Oorzaak'])
 
 # Functie om een plot te genereren op basis van de geselecteerde categorie
 def generate_plot(category):
     if category == 'Vlucht Fase':
+        st.subheader("Relatie tussen de overlevingskans en vluchtfase")
+        st.write("Hier wordt er gekeken naar de overlevingskansen voor verschillende vluchtfases waar er een ongeluk plaatsvond.")
         fig = px.box(filtered_df, x='SurvivalRate', y='During', color='During', 
         title='Overlevingskans per vluchtfase',
         labels={'SurvivalRate': 'Overlevingskans', 'During': 'Vluchtfase'})
@@ -305,7 +308,10 @@ def generate_plot(category):
         fig.update_layout(showlegend=False)
         
         st.plotly_chart(fig)
+        
     elif category == 'Militaire vluchten':
+        st.subheader("Relatie tussen Militair en niet-Militaire vliegtuigongenlukken")
+        st.write("Hier wordt er gekeken naar de aantal overledenen per jaar per vluchtfase. Dit hebben we verdeeld tussen militaire en niet-militaire vluchten.")
         fig = px.scatter(data_frame=filtered_df, y= "Fatalities", x = "Date", color = "During")
         unique_M_nonM = df['M_nonM'].unique()
         
@@ -327,23 +333,31 @@ def generate_plot(category):
         )
 
         st.plotly_chart(fig)
+
     elif category == 'Oorzaak':
+        st.subheader("Relatie tussen de oorzaak en overlevingskans")
+        st.write("Er wordt een boxplot weergegeven waarbij de distributie van de overlevingskansen te zien is tegenover de oorzaak.")
         fig = px.box(filtered_df, x='SurvivalRate', y='Cause', color='Cause', 
         title='Overlevingskans per oorzaak',
         labels={'SurvivalRate': 'Overlevingskans', 'Cause': 'Oorzaak'})
         
         fig.update_traces(marker=dict(line=dict(width=2)))
         fig.update_layout(showlegend=False)
-        
+
         st.plotly_chart(fig)
+
     elif category == 'Fabrikant':
-        fig = px.histogram(filtered_df, x="Year", color="Manufacturer")
+        st.subheader("Relatie tussen de Fabrikant van het vliegtuig en het aantal ongevallen.")
+        st.write("Om de relatie te zien tussen het fabrikant en het aantal ongevallen, wordt er een boxplot gemaakt om de distributie weer te geven per fabrikant")
+        fig = px.histogram(filtered_df, x="Year", color="Manufacturer", opacity = 0.7, barmode ="group")
         fig.update_layout(
         title='Aantal vliegtuigongevallen per jaar per fabrikant',
         xaxis_title='Jaar',
         yaxis_title='Aantal ongevallen'
         )
-        st.plotly_chart(fig)  # This line should be inside a conditional block
+
+        st.plotly_chart(fig)
+        
     else:
         st.write(f'Geen plot beschikbaar voor {category}')
 
