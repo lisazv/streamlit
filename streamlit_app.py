@@ -288,8 +288,29 @@ min_year, max_year = st.sidebar.slider(
     value=(df['Date'].dt.year.min(), df['Date'].dt.year.max())
 )
 
-# Filter de DataFrame op basis van de geselecteerde jaren
-filtered_df = df[df['Date'].dt.year.between(min_year, max_year)]
+unique_regions = df['Region'].unique().tolist()
+
+# Voeg een optie toe om alle regio's te selecteren
+options = ['Alle regio’s'] + unique_regions
+
+# Dropdown selectie box
+selected_region = st.sidebar.selectbox(
+    'Selecteer een regio:',
+    options=options,
+    index=0  # Standaardwaarde is 'Alle regio’s'
+)
+
+# Als 'Alle regio’s' is geselecteerd, gebruik dan alle unieke regio's. Anders, gebruik de geselecteerde regio.
+if selected_region == 'Alle regio’s':
+    selected_regions = unique_regions
+else:
+    selected_regions = [selected_region]
+
+# Filter de DataFrame op basis van de geselecteerde jaren en regio's
+filtered_df = df[
+    (df['Date'].dt.year.between(min_year, max_year)) &
+    (df['Region'].isin(selected_regions))
+]
 
 df['Date'] = pd.to_datetime(df['Date'])  # Converteer de datumkolom naar datetime
 
