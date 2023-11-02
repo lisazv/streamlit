@@ -15,7 +15,7 @@ import plotly.express as px
 # In[21]:
 
 
-df = pd.read_csv('Large_Passenger_Plane_Crashes_1933_to_2009.csv')
+df = pd.read_csv('Life-Expectancy-Data-Updated.csv')
 df.head()
 
 
@@ -31,15 +31,15 @@ df.info()
 #Date omzetten naar DateTime
 
 # Verwijder eventuele leading/trailing whitespaces van de 'Date' kolom
-df['Date'] = df['Date'].str.strip()
+df['Year'] = df['Year'].str.strip()
 
 # Converteer de 'Date' kolom naar een datetime object, negeer de tijd
-df['Date'] = pd.to_datetime(df['Date'], errors='coerce', format='%m/%d/%y')
+df['Year'] = pd.to_datetime(df['Year'], errors='coerce', format='%m/%d/%y')
 
 def correct_year(dt):
     if pd.isnull(dt):
         return dt  # Retourneer NaT zoals het is
-    if dt.year > 2010:
+    if dt.year > 2016:
         return dt.replace(year=dt.year-100)  # Aanpassen van het jaartal
     return dt  # Retourneer het oorspronkelijke datetime object als het jaartal correct is
 
